@@ -1,0 +1,15 @@
+v3.0 Changelog:
+What's New?
+- Added Time Box and Time Adjustment Layout when opening Scoreboard App.
+- Fixed Maintainers Github position to the bottom.
+- Fixed Set Timer cancel button.
+
+v2.0 Changelog:
+What's new?
+- Added Maintainers Github.
+- Added sync button.
+- Fixed icon for Connect Button.
+- Fixed Set Timer & Create Team submit button.
+- Fixed Bluetooth can't get data from Arduino.
+- Fixed synchronization between Panel and Scoreboard App.
+- Fixed bug incorrect data from Arduino to Scoreboard App.
