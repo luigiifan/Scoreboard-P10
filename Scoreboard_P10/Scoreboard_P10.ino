@@ -174,8 +174,8 @@ void showTimer(){
 }
 
 void loop() {
-  while(Serial.available()){
-    BT = Serial.read();
+  while(bluetooth.available()){
+    BT = bluetooth.read();
     switch(BT){
       case 'A':
         Lscore++;
