@@ -7,162 +7,117 @@
 #include <fonts/System4x7.h>
 #include <fonts/BIG7SEGMENT.H>
 #include <fonts/FIXEDNUMS7x15.h>
+#include <fonts/System4x7.h>
 #include <SoftwareSerial.h>
-SoftwareSerial bluetooth (3,2); //TX, RX
+SoftwareSerial bluetooth (3,2);
 
-/*LIST OF BYTE RECEIVE
- *
- *LSCORE+ = A 
- *LSCORE- = B
- *LFOUL+ = C
- *LFOUL- = D
- *-----------
- *RSCORE+ = E
- *RSCORE- = F
- *RFOUL+ = G
- *RFOUL- = H
- *-----------
- *ROUND+ = I
- *ROUND- = J
- *-----------
- *RESET_SCOREBOARD = K
- *-----------
- *ASIDE = L
- *BSIDE = M
- *
- */
-
-
-//Scoreboard
 int Lscore = 0;
 int Rscore = 0;
 int Round = 1;
 int Lfoul = 0;
 int Rfoul = 0;
-int tukarSisi = 0;
+const unsigned long tInterval = 1000UL;
+unsigned long pTime;
+unsigned long cTime;
+int menit = 0;
+int saveMenit = menit;
+int detik = 0;
+int waktuHabis = 0;
+int displayMenit;
+int displayDetik;
+boolean countStart = false;
 char BT;
 char dmdBuff[10];
-
+char dmdBuff2[2];
 SoftDMD dmd (2,1);
 
 void setup() {
   dmd.setBrightness(20);
   dmd.begin();
   Serial.begin(9600);
+  detik += 60 * menit;
   bluetooth.begin(9600);
   showScore();
 }
 
-//Display the current score
 void showScore(){
-  if (tukarSisi == 1){
-    dmd.clearScreen();
-    dmd.selectFont(FIXEDNUMS7x15);
+    dmd.selectFont(BigNumber);
     sprintf(dmdBuff, "%.2d", Lscore);
-    dmd.drawString(48, 2, dmdBuff);
-    dmd.drawLine(18,0,18,15);
+    dmd.drawString(1, 0, dmdBuff);
     dmd.selectFont(Mono5x7);
     sprintf(dmdBuff, "%d", Lfoul);
-    dmd.drawString(37, 9, dmdBuff);
+    dmd.drawString(17, 9, dmdBuff);
     sprintf(dmdBuff, "%d", Rfoul);
-    dmd.drawString(22, 9, dmdBuff);
-    dmd.selectFont(System4x7);
-    sprintf(dmdBuff, "%.2d", Round);
-    dmd.drawString(28, -1, dmdBuff);
-    dmd.selectFont(FIXEDNUMS7x15);
-    dmd.drawLine(45,0,45,15);
-    sprintf(dmdBuff, "%.2d", Rscore);
-    dmd.drawString(1, 2, dmdBuff);
-  }
-  else{
-    dmd.clearScreen();
-    dmd.selectFont(FIXEDNUMS7x15);
-    sprintf(dmdBuff, "%.2d", Lscore);
-    dmd.drawString(1, 2, dmdBuff);
-    dmd.drawLine(18,0,18,15);
-    dmd.selectFont(Mono5x7);
-    sprintf(dmdBuff, "%d", Lfoul);
-    dmd.drawString(22, 9, dmdBuff);
-    sprintf(dmdBuff, "%d", Rfoul);
-    dmd.drawString(37, 9, dmdBuff);
+    dmd.drawString(42, 9, dmdBuff);
     dmd.selectFont(System_Mid5x7);
     sprintf(dmdBuff, "%d", Round);
-    dmd.drawString(29, -1, dmdBuff);
-    dmd.selectFont(FIXEDNUMS7x15);
-    dmd.drawLine(45,0,45,15);
+    dmd.drawString(29, 8, dmdBuff);
+    dmd.selectFont(BigNumber);
     sprintf(dmdBuff, "%.2d", Rscore);
-    dmd.drawString(48, 2, dmdBuff);
+    dmd.drawString(50, 0, dmdBuff);
+    dmd.selectFont(System4x7);
+    showTimer();
   }
+
+void hideTimer(){
+  dmd.selectFont(BigNumber);
+  sprintf(dmdBuff, "%.2d", Lscore);
+  dmd.drawString(1, 0, dmdBuff);
+  dmd.selectFont(Mono5x7);
+  sprintf(dmdBuff, "%d", Lfoul);
+  dmd.drawString(17, 9, dmdBuff);
+  sprintf(dmdBuff, "%d", Rfoul);
+  dmd.drawString(42, 9, dmdBuff);
+  dmd.selectFont(System_Mid5x7);
+  sprintf(dmdBuff, "%d", Round);
+  dmd.drawString(29, 8, dmdBuff);
+  dmd.selectFont(BigNumber);
+  sprintf(dmdBuff, "%.2d", Rscore);
+  dmd.drawString(50, 0, dmdBuff);
 }
 
-//Reset Score
 void resetScore(){
-  if (BT == 'K'){
-    Lscore = 0;
-    Rscore = 0;
-    Lfoul = 0;
-    Rfoul = 0;
-    Round = 1;
-  }
-showScore();
+  Lscore = 0;
+  Rscore = 0;
+  Lfoul = 0;
+  Rfoul = 0;
+  Round = 1;
+  waktuHabis = 0;
+  menit = saveMenit;
+  detik = 0;
+  detik += 60 * menit;
+  countStart = false;
+  showScore();
 }
 
-//Team Side Indicator
 void teamSide(){
-  if (BT == 'L'){ //A SIDE
-    dmd.drawLine(23,0,23,6);
-    dmd.drawLine(22,1,22,5);
-    dmd.drawLine(21,2,21,4);
-    dmd.drawLine(20,3,20,3);
-    delay(500);
-    showScore();
-    delay(500);
-    dmd.drawLine(23,0,23,6);
-    dmd.drawLine(22,1,22,5);
-    dmd.drawLine(21,2,21,4);
-    dmd.drawLine(20,3,20,3);
-    delay(500);
-    showScore();
-    delay(500);
-    dmd.drawLine(23,0,23,6);
-    dmd.drawLine(22,1,22,5);
-    dmd.drawLine(21,2,21,4);
-    dmd.drawLine(20,3,20,3);
-    delay(3000);
-    showScore();
+  if (BT == 'L'){
+    hideTimer();
+    dmd.drawLine(21,0,21,6);
+    dmd.drawLine(20,1,20,5);
+    dmd.drawLine(19,2,19,4);
+    dmd.drawLine(18,3,18,3);
+    delay(2000);
+    hideTimer();
   }
+  
   if (BT == 'M'){
-    dmd.drawLine(40,0,40,6);
-    dmd.drawLine(41,1,41,5);
-    dmd.drawLine(42,2,42,4);
-    dmd.drawLine(43,3,43,3);
-    delay(500);
-    showScore();
-    delay(500);
-    dmd.drawLine(40,0,40,6);
-    dmd.drawLine(41,1,41,5);
-    dmd.drawLine(42,2,42,4);
-    dmd.drawLine(43,3,43,3);
-    delay(500);
-    showScore();
-    delay(500);
-    dmd.drawLine(40,0,40,6);
-    dmd.drawLine(41,1,41,5);
-    dmd.drawLine(42,2,42,4);
-    dmd.drawLine(43,3,43,3);
-    delay(3000);
-    showScore();
+    hideTimer();
+    dmd.drawLine(42,0,42,6);
+    dmd.drawLine(43,1,43,5);
+    dmd.drawLine(44,2,44,4);
+    dmd.drawLine(45,3,45,3);
+    delay(2000);
+    hideTimer();
   }
-  }
+}
 
 void syncApp(){
-  String dataValue = String(Lscore) + "," + String(Lfoul) + "," + String(Rscore) + "," + String(Rfoul) + "," + String(Round) + ",";
-  
+  String dataValue = String(Lscore) + "," + String(Lfoul) + "," + String(Rscore) + "," + String(Rfoul) + "," + String(Round) + "," + String(waktuHabis) + ",";
   bluetooth.println(dataValue);
   Serial.println(dataValue);
 }
 
-//Maximum Score (changes depending on what game is being played.)
 void MaxScore(){
   if (BT == 'A' && Lscore > 99){
     Lscore = 99;
@@ -182,7 +137,6 @@ void MaxScore(){
   showScore();
 }
 
-//Minimum Score (default: can't go -1 after 0)
 void MinScore(){
   if (BT == 'B' && Lscore < 0){
     Lscore = 0;
@@ -202,9 +156,26 @@ void MinScore(){
   showScore();
 }
 
+void timeOut(){
+  countStart = false;
+  detik = 0;
+  waktuHabis = 1;
+  syncApp();
+}
+
+void showTimer(){
+  dmd.selectFont(System4x7);
+  displayMenit = detik/60;
+  displayDetik = detik % 60;
+  sprintf(dmdBuff, "%.2d", displayMenit);
+  sprintf(dmdBuff2, "%.2d", displayDetik);
+  dmd.drawFilledBox(22,0,43,6, GRAPHICS_OFF);
+  dmd.drawString(22, -1, String(dmdBuff) + ":" + String(dmdBuff2));
+}
+
 void loop() {
-  if(bluetooth.available()){ //bluetooth or Serial
-    BT = bluetooth.read();
+  while(Serial.available()){
+    BT = Serial.read();
     switch(BT){
       case 'A':
         Lscore++;
@@ -270,18 +241,46 @@ void loop() {
         resetScore();
         syncApp();
         break;
-      case 'L':
-        teamSide();
-        syncApp();
-        break;
-      case 'M':
-        teamSide();
-        syncApp();
+//      case 'L':
+//        teamSide();
+//        break;
+//      case 'M':
+//        teamSide();
         break;
       case 'N':
         syncApp();
         break;
+      case 'O':
+        countStart = true;
+        break;
+      case 'P':
+        countStart = false;
+        break;
+      case 'Q':
+        menit++;
+        saveMenit = menit;
+        detik = 0;
+        detik += 60 * menit;
+        showTimer();
+        break;
+      case 'R':
+        menit--;
+        saveMenit = menit;
+        detik = 0;
+        detik += 60 * menit;
+        showTimer();
+        break;
     }
   }
-}// Void Loop
   
+  cTime = millis();
+  if(cTime - pTime > tInterval){
+    if(countStart == true){
+      pTime = cTime;
+      detik--;
+      if(detik < 0) timeOut();
+    showTimer();
+    }
+    pTime = cTime;
+  }
+}
