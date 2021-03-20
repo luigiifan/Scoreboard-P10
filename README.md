@@ -5,5 +5,5 @@ Maintainers:<br/>www.twitter.com/luigiifan13
 <br><h2>Release History</h2>
 Scoreboard v4.0 (Added timer) - 3/19/2021
 <br>Scoreboard v3.0 (Change app UI) - 3/1/2021
-<br>Scoreboard v2.0 (Using 2 P10 panel) - 2/18/2021
+<br>Scoreboard v2.0 (Compatible with 2 panels) - 2/18/2021
 <br>Scoreboard v1.0 - 2/14/2021
