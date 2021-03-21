@@ -1,6 +1,5 @@
 - Only support for Android 9 or higher
 - The UI is for 19:9 ratio display (1080 x 2280)
-- For other display is coming soon with latest update
 - I will upload the source code at final version for future development
 - This app will get updates continuously until final vers release
 - Update manually with downloading the latest version on github
