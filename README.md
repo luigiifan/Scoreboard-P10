@@ -1,4 +1,4 @@
-# About
+# Introduction
 Scoreboard using P10 LED Matrix Panel with Arduino and Bluetooth HC-05 for app-based wireless controller.<br/>
 App is compitible with Android 7 or higher.
 
